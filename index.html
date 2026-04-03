@@ -469,12 +469,17 @@ class PvZGame {
     update(deltaTime) {
         if (this.state !== GameState.PLAYING) return;
 
-        // 更新阳光计数
-        this.sun += deltaTime * 0.001; // 缓慢自然增长
+        // 保护：deltaTime过大时不执行更新（防止首帧异常）
+        if (deltaTime > 1000) return;
 
-        // 生成波次
+        // 更新阳光计数
+        this.sun += deltaTime * 0.0001; // 缓慢自然增长
+
+        // 生成波次（给玩家30秒准备时间后再开始第一波）
         this.waveTimer += deltaTime;
-        if (this.waveTimer >= CONFIG.WAVE_INTERVAL && this.wave < 5) {
+        const firstWaveDelay = 30000; // 第一波延迟30秒
+        if ((this.wave === 0 && this.waveTimer >= firstWaveDelay) ||
+            (this.wave > 0 && this.waveTimer >= CONFIG.WAVE_INTERVAL)) {
             this.waveTimer = 0;
             this.wave++;
             this.spawnWave();
@@ -584,14 +589,16 @@ class PvZGame {
     }
 
     spawnWave() {
+        if (this.wave > 5) return; // 最多5波
         const zombiesPerWave = 3 + this.wave * 2;
         for (let i = 0; i < zombiesPerWave; i++) {
+            const idx = i;
             setTimeout(() => {
                 if (this.state === GameState.PLAYING) {
                     const row = Math.floor(Math.random() * CONFIG.GRID_ROWS);
                     this.addZombie(row);
                 }
-            }, i * 2000);
+            }, idx * 3000 + 100); // 每只僵尸间隔3秒
         }
     }
 
