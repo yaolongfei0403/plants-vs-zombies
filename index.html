@@ -537,14 +537,12 @@ class PvZGame {
         for (let i = this.zombies.length - 1; i >= 0; i--) {
             const z = this.zombies[i];
 
-            // 移动
-            z.x -= z.speed;
-
             // 碰撞检测：与植物
             const cellCol = Math.floor((z.x + CONFIG.CELL_SIZE/2) / CONFIG.CELL_SIZE);
-            const plant = this.grid[z.row][cellCol];
+            const plant = (z.row >= 0 && z.row < CONFIG.GRID_ROWS && cellCol >= 0 && cellCol < CONFIG.GRID_COLS)
+                ? this.grid[z.row][cellCol]
+                : null;
             if (plant) {
-                z.x += z.speed; // 停止移动
                 z.attackTimer += deltaTime;
                 if (z.attackTimer >= ZOMBIES.normal.attackInterval) {
                     z.attackTimer = 0;
@@ -554,6 +552,9 @@ class PvZGame {
                         this.plants = this.plants.filter(p => p !== plant);
                     }
                 }
+            } else {
+                // 只有没碰到植物时才移动
+                z.x -= z.speed * deltaTime;
             }
 
             // 检查失败条件
