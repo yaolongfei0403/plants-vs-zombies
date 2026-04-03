@@ -358,11 +358,29 @@ class PvZGame {
     }
 
     handleCanvasClick(e) {
-        if (this.state !== GameState.PLAYING || !this.selectedPlant) return;
+        if (this.state !== GameState.PLAYING) return;
 
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+
+        // 检查是否点击了阳光（优先）
+        for (let i = this.suns.length - 1; i >= 0; i--) {
+            const sun = this.suns[i];
+            if (!sun.collected) {
+                const dx = x - sun.x;
+                const dy = y - sun.y;
+                if (dx * dx + dy * dy <= 20 * 20) { // 半径20的圆
+                    this.sun += sun.value;
+                    this.suns.splice(i, 1);
+                    this.updateCards();
+                    return;
+                }
+            }
+        }
+
+        // 植物放置逻辑
+        if (!this.selectedPlant) return;
 
         const col = Math.floor(x / CONFIG.CELL_SIZE);
         const row = Math.floor(y / CONFIG.CELL_SIZE);
