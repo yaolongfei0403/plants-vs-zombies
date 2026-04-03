@@ -476,13 +476,14 @@ class PvZGame {
         // 豌豆射手射击
         this.plants.forEach(plant => {
             if (plant.type === 'peashooter') {
-                // 检查是否有僵尸在同一行
-                const hasZombieInRow = this.zombies.some(z => z.row === plant.row && z.x > plant.x);
-                if (hasZombieInRow) {
+                // 检查是否有僵尸在同一行且在射程内（植物右侧）
+                const hasZombieInRange = this.zombies.some(z => z.row === plant.row && z.x > plant.x);
+                if (hasZombieInRange) {
                     plant.timer += deltaTime;
-                    if (plant.timer >= CONFIG.PEA_COOLDOWN || !CONFIG.PEA_COOLDOWN) {
+                    const cooldown = PLANTS.peashooter.cooldown;
+                    if (plant.timer >= cooldown) {
                         plant.timer = 0;
-                        this.addProjectile(plant.x + CONFIG.CELL_SIZE, plant.y + CONFIG.CELL_SIZE/2, plant.row);
+                        this.addProjectile(plant.x + CONFIG.CELL_SIZE - 10, plant.y + CONFIG.CELL_SIZE/2, plant.row);
                     }
                 }
             }
