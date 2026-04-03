@@ -553,8 +553,8 @@ class PvZGame {
                     }
                 }
             } else {
-                // 只有没碰到植物时才移动
-                z.x -= z.speed * deltaTime;
+                // 只有没碰到植物时才移动 (speed是px/frame@60fps, 需要按deltaTime缩放)
+                z.x -= z.speed * (deltaTime / 16.67);
             }
 
             // 检查失败条件
